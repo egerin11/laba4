@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include"lib.h"
 #include<time.h>
-
+#include<stdlib.h>
 int main() {
     int capacity = 8;
     int size = 0;
@@ -19,6 +19,7 @@ int main() {
         printf("%s \n", answer[i]);
     printf("----------");
     print(root);
+    free(*answer);
     freeTree(root);
     return 0;
 }

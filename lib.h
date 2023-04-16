@@ -17,7 +17,7 @@ Tree *createBranch(char *question, int id);
 
 char **memory(int capacity);
 
-void addMemory(char ***array, char *answer, int *capacity, int *size);
+void addMemory(char ***array, char **answer, int *capacity, int *size);
 
 void findAnswer(Tree *root, char ***answer, int *capacity, int *size);
 

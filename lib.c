@@ -57,12 +57,12 @@ char **memory(const int capacity) {
     return array;
 }
 
-void addMemory(char ***array, char *answer, int *capacity, int *size) {
+void addMemory(char ***array, char **answer, int *capacity, int *size) {
     if (*size + 1 == *capacity) {
         *capacity *= 2;
         *array = (char **) realloc(*array, *capacity * sizeof(char *));
     }
-    (*array)[*size] = answer;
+    (*array)[*size] = *answer;
     (*size)++;
 }
 
@@ -74,29 +74,34 @@ void inputAnswer(char **answer) {
 }
 
 void findAnswer(Tree *root, char ***answer, int *capacity, int *size) {
-    if (root->right == NULL) printf("%s ", root->question);
+    if (root->right == NULL) printf("%s ?", root->question);
     else printf("%s ", root->question);
     char *array = malloc(1);
     inputAnswer(&array);
-    addMemory(answer, array, capacity, size);
+    addMemory(answer, &array, capacity, size);
     if (strcmp(array, "yes") == 0) {
         if (root->right != NULL) {
-            addMemory(answer, (root->question), capacity, size);
+            addMemory(answer, &(root->question), capacity, size);
             findAnswer(root->right, answer, capacity, size);
-        } else printf("Тот кто писал этот код явно ввел этот ответ!!!!\n");
+        } else {
+            printf("Тот кто писал этот код явно ввел этот ответ!!!!\n");
+            free(array);
+        }
     } else if (strcmp(array, "no") == 0) {
         if (root->left != NULL) {
-            addMemory(answer, root->question, capacity, size);
+            addMemory(answer, &(root->question), capacity, size);
             findAnswer(root->left, answer, capacity, size);
         } else {
             printf("Видимо в моей базе нет такого объекта.\nCейчас победили вы человечки,но настанет мой час!!!!\nВведите что это было\n");
             char *newQuestion;
             char *newObject;
             getString(&newObject);
+            addMemory(answer, &newObject, capacity, size);
             printf("Напишите как отличить это %s от этого %s\n", newObject, root->question);
             getString(&newQuestion);
-            Tree *newQuestionRoot = createBranch(newQuestion, *size+1);
-            Tree *newObjectRoot = createBranch(newObject, *size );
+            addMemory(answer, &newQuestion, capacity, size);
+            Tree *newQuestionRoot = createBranch(newQuestion, *size);
+            Tree *newObjectRoot = createBranch(newObject, *size + 1);
             newQuestionRoot->right = newObjectRoot;
             root->left = newQuestionRoot;
 
@@ -110,14 +115,10 @@ void writeDataInFile(Tree *root, FILE *file) {
         fprintf(file, "\"question\": \"%s\"\n", root->question);
         if (root->right != NULL) {
             fprintf(file, "\"yes\": %d\n", root->right->id);
-        } else {
-            fprintf(file, "\"yes\": %d\n", 0);
-        }
+        } else fprintf(file, "\"yes\": %d\n", root->id - 1);
         if (root->left != NULL) {
             fprintf(file, "\"no\": %d\n", root->left->id);
-        } else {
-            fprintf(file, "\"no\": %d\n", 0);
-        }
+        } else fprintf(file, "\"no\": %d\n", root->id);
         writeDataInFile(root->right, file);
         writeDataInFile(root->left, file);
     }
